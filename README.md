@@ -274,6 +274,10 @@ Copy that one file to any device and open it directly in a browser
 device/browser gets its own local IndexedDB store — use Admin → Data →
 Export/Import to move a plan between devices.
 
+A pre-built copy of this file is committed at `release/householdplan.html`
+for direct download/testing without running a build — regenerate it after
+any change with `npm run build:single && cp dist-single/index.html release/householdplan.html`.
+
 ## Backing up / restoring your data
 
 From **Admin → Data**:

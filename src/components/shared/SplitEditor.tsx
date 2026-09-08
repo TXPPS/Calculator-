@@ -113,7 +113,7 @@ export function SplitEditor({ owner, onOwnerChange, split, onSplitChange, amount
               </label>
               <label className="field field--inline">
                 <span className="field__label">{p2Name}</span>
-                <CurrencyInput cents={amountCents - split.person1Cents} onChange={() => {}} />
+                <CurrencyInput cents={amountCents - split.person1Cents} onChange={() => {}} disabled />
               </label>
             </div>
           )}

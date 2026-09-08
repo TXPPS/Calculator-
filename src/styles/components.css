@@ -13,6 +13,7 @@
   transition: background var(--transition-fast), border-color var(--transition-fast), color var(--transition-fast);
   background: transparent;
   color: var(--color-text);
+  text-decoration: none;
 }
 
 .btn--primary {
@@ -55,7 +56,7 @@
 }
 
 .btn--small {
-  min-height: 36px;
+  min-height: var(--touch-target);
   padding: var(--space-1) var(--space-3);
   font-size: 0.85rem;
 }
@@ -275,6 +276,14 @@ textarea {
   outline: none;
 }
 
+.currency-input--disabled {
+  opacity: 0.6;
+}
+
+.currency-input__field:disabled {
+  cursor: not-allowed;
+}
+
 /* ---------- Modal ---------- */
 .modal-overlay {
   position: fixed;
@@ -472,10 +481,34 @@ textarea {
   align-items: baseline;
 }
 
+/* Only the hero row should carry the card's positive/negative tint —
+   the plain income/allocated rows stay neutral so the hero figure keeps
+   the most visual emphasis (matches PersonCard, which only tints its
+   final Remaining/Shortfall row). */
+.household-summary__label {
+  color: var(--color-text-secondary);
+}
+
+.household-summary__value {
+  color: var(--color-text);
+}
+
 .household-summary__row--hero {
   padding-top: var(--space-3);
   border-top: 1px solid var(--color-border);
   margin-top: var(--space-2);
+}
+
+.household-summary__row--hero .household-summary__label {
+  font-weight: 600;
+}
+
+.household-summary.is-positive .household-summary__row--hero .household-summary__label {
+  color: var(--color-positive);
+}
+
+.household-summary.is-negative .household-summary__row--hero .household-summary__label {
+  color: var(--color-danger);
 }
 
 .household-summary__value--hero {
@@ -804,6 +837,7 @@ textarea {
   border-radius: var(--radius-md);
   color: var(--color-text-secondary);
   font-weight: 500;
+  text-decoration: none;
 }
 .app-nav__link:hover {
   background: var(--color-hover);

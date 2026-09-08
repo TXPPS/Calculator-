@@ -9,6 +9,13 @@ export default defineConfig({
   use: {
     baseURL: 'http://localhost:4173',
     trace: 'on-first-retry',
+    // The sandbox only has a Chromium build preinstalled (no WebKit/Firefox),
+    // so every project below runs on Chromium, with mobile/tablet projects
+    // emulating device viewport/touch characteristics instead of using the
+    // WebKit-based iPhone/iPad device descriptors.
+    launchOptions: {
+      executablePath: process.env.PLAYWRIGHT_CHROMIUM_PATH ?? '/opt/pw-browsers/chromium',
+    },
   },
   webServer: {
     command: 'npm run build && npm run preview -- --port 4173',
@@ -18,7 +25,23 @@ export default defineConfig({
   },
   projects: [
     { name: 'chromium', use: { ...devices['Desktop Chrome'] } },
-    { name: 'mobile', use: { ...devices['iPhone 14'] } },
-    { name: 'tablet', use: { ...devices['iPad (gen 7)'] } },
+    {
+      name: 'mobile',
+      use: {
+        ...devices['Desktop Chrome'],
+        viewport: { width: 390, height: 844 },
+        isMobile: true,
+        hasTouch: true,
+      },
+    },
+    {
+      name: 'tablet',
+      use: {
+        ...devices['Desktop Chrome'],
+        viewport: { width: 810, height: 1080 },
+        isMobile: true,
+        hasTouch: true,
+      },
+    },
   ],
 });

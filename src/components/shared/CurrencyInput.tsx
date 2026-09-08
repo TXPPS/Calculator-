@@ -6,12 +6,13 @@ interface CurrencyInputProps {
   cents: number;
   onChange: (cents: number) => void;
   placeholder?: string;
+  disabled?: boolean;
   'aria-label'?: string;
   'aria-invalid'?: boolean;
   'aria-describedby'?: string;
 }
 
-export function CurrencyInput({ id, cents, onChange, placeholder, ...aria }: CurrencyInputProps) {
+export function CurrencyInput({ id, cents, onChange, placeholder, disabled, ...aria }: CurrencyInputProps) {
   const [text, setText] = useState(cents === 0 ? '' : centsToDollars(cents).toFixed(2));
 
   useEffect(() => {
@@ -23,7 +24,7 @@ export function CurrencyInput({ id, cents, onChange, placeholder, ...aria }: Cur
   }, [cents]);
 
   return (
-    <div className="currency-input">
+    <div className={`currency-input ${disabled ? 'currency-input--disabled' : ''}`.trim()}>
       <span className="currency-input__prefix" aria-hidden="true">
         $
       </span>
@@ -34,6 +35,7 @@ export function CurrencyInput({ id, cents, onChange, placeholder, ...aria }: Cur
         className="currency-input__field"
         value={text}
         placeholder={placeholder ?? '0.00'}
+        disabled={disabled}
         onChange={(e) => {
           const raw = e.target.value;
           if (/^\d*\.?\d{0,2}$/.test(raw)) {

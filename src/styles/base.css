@@ -53,6 +53,11 @@ textarea {
   border-radius: var(--radius-sm);
 }
 
+input[type='checkbox'],
+input[type='radio'] {
+  accent-color: var(--color-accent);
+}
+
 a {
   color: var(--color-accent);
 }

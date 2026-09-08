@@ -49,6 +49,15 @@
   .page__header .btn {
     width: 100%;
   }
+
+  /* Short admin-list item names (e.g. a two-word category) otherwise sit on
+     the same row as the action buttons while longer names wrap below them —
+     an inconsistent rhythm from row to row. Stack consistently on narrow
+     screens instead. */
+  .admin-list__item {
+    flex-direction: column;
+    align-items: stretch;
+  }
 }
 
 /* Ensure tables inside print-preview never force page-level horizontal scroll on small screens */

@@ -12,7 +12,7 @@ test('print report renders paycheck income, bill splits, and plan status', async
   // Paycheck income for Alex: biweekly, 3 checks in Jan 2026, $3,000 total.
   await goTo(page, 'Income');
   await page.getByRole('button', { name: 'Add income for Alex' }).click();
-  let dialog = page.getByRole('dialog');
+  const dialog = page.getByRole('dialog');
   await dialog.getByLabel('Description').fill('Report Paycheck');
   await dialog.getByLabel('Income type').selectOption({ label: 'Paycheck' });
   await dialog.locator('.currency-input__field').first().fill('1000');

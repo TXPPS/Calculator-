@@ -12,16 +12,18 @@ import { validateAmountCents, validateName } from '../../domain/calculations/val
 
 function IncomeForm({
   initial,
+  defaultPerson,
   onSave,
   onClose,
 }: {
   initial?: IncomeEntry;
+  defaultPerson?: PersonId;
   onSave: (values: Omit<IncomeEntry, 'id' | 'monthId' | 'templateId'>) => Promise<void>;
   onClose: () => void;
 }) {
   const { household } = useAppData();
   const [description, setDescription] = useState(initial?.description ?? '');
-  const [person, setPerson] = useState<PersonId>(initial?.person ?? 'person1');
+  const [person, setPerson] = useState<PersonId>(initial?.person ?? defaultPerson ?? 'person1');
   const [amountCents, setAmountCents] = useState(initial?.amountCents ?? 0);
   const [recurring, setRecurring] = useState(initial?.recurring ?? true);
   const [notes, setNotes] = useState(initial?.notes ?? '');
@@ -207,6 +209,7 @@ export function IncomePage() {
       {formOpen && (
         <IncomeForm
           initial={editing?.id ? editing : undefined}
+          defaultPerson={editing?.person}
           onSave={async (values) => {
             if (editing?.id) {
               await incomeRepository.save({ ...editing, ...values });

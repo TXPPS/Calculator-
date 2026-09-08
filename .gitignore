@@ -1,6 +1,7 @@
 node_modules
 dist
 dist-ssr
+dist-single
 *.local
 .DS_Store
 coverage

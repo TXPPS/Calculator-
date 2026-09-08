@@ -179,9 +179,21 @@ npm run lint       # ESLint
 ## Production build
 
 ```bash
-npm run build      # tsc -b && vite build → dist/
-npm run preview    # preview the production build locally
+npm run build        # tsc -b && vite build → dist/
+npm run preview      # preview the production build locally
+npm run build:single # → dist-single/index.html, one self-contained file
 ```
+
+### Single-file build
+
+`npm run build:single` produces `dist-single/index.html` — the entire app
+(JS, CSS, everything) inlined into one file, using
+[`vite-plugin-singlefile`](https://github.com/richardtallent/vite-plugin-singlefile)
+and hash-based routing (`HashRouter`) so it works with no server at all.
+Copy that one file to any device and open it directly in a browser
+(`file://…/index.html`), or drop it on any static file host. Each
+device/browser gets its own local IndexedDB store — use Admin → Data →
+Export/Import to move a plan between devices.
 
 ## Backing up / restoring your data
 

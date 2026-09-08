@@ -27,12 +27,12 @@ src/
   domain/            Pure business logic — no React, no persistence
     money/            Integer-cent currency math, deterministic rounding
     splits/            Split method types + calculateSplit()
-    income/            Income entry/template types
+    income/            Income entry/template types, paycheck schedule date math
     expenses/           Expense entry/template types (bills, planned, fun, savings)
     household/          Household config types
     categories/         Category types
-    monthly-plan/       Month key helpers
-    calculations/       calculatePlanSummary(), comparePlanSummaries(), validation
+    monthly-plan/       Month key helpers, Monthly Review state
+    calculations/       calculatePlanSummary(), comparePlanSummaries(), validation, review signatures
 
   data/               Persistence layer
     database/            IndexedDB schema + connection (via `idb`)
@@ -76,22 +76,89 @@ layer or UI components.
 - **Shortfalls are never clamped to zero.** A negative remaining amount is
   shown as-is, with an explanatory message, both per-person and household.
 
+## Paycheck / income frequency system
+
+Income entries have an **income type**:
+
+- **Paycheck** — a recurring wage with a per-paycheck amount and a
+  **frequency** (Weekly, Every 2 Weeks/Biweekly, Twice Monthly/Semi-Monthly,
+  Monthly). The month's total is the actual number of paydays that fall in
+  the **selected calendar month** — never an average like `amount × 26 ÷ 12`.
+  A 3-paycheck month (common for biweekly schedules) is calculated correctly
+  and flagged with a small indicator, not hidden.
+  - Weekly/Biweekly use a known payday **anchor date**; every other paycheck
+    date is derived from it, forward and backward across any month/year
+    boundary.
+  - Semi-Monthly uses two day-of-month positions (e.g. "1st and 15th", or
+    "15th and Last Day of month" — leap-year-safe).
+  - Monthly uses a single day-of-month position.
+  - All date math (`src/domain/income/payFrequency.ts`) works in explicit
+    UTC year/month/day integers, never local `Date` getters, so it can't
+    drift a payday by a day depending on the runtime's timezone.
+  - A **manual override** lets you set the actual expected paycheck count
+    and/or total for a month when reality differs from the regular schedule
+    (an extra payment, a partial check) — clearly marked as overridden, with
+    a one-click "Return to automatic calculation".
+- **Other Recurring Income**, **One-Time Income**, **Irregular / Custom
+  Income** — behave like a simple "expected amount this month" entry (the
+  original income model).
+
+Every income entry — regardless of type — still contributes a single
+authoritative `amountCents` that feeds person/household totals and
+**income-proportional** shared-expense splits exactly as before; the
+paycheck schedule only changes how that number is calculated.
+
 ## Monthly planning workflow
 
 1. **Months** page: create a new month, either **blank** or by **copying
    recurring items** from a previous month. Only entries marked *recurring*
    are copied; one-time entries, notes, and month-specific adjustments are
-   never carried forward — money is also never rolled over as income.
+   never carried forward — money is also never rolled over as income. A
+   recurring **paycheck** entry copies its schedule, not a static total: its
+   occurrences and total are recalculated for the new month's real calendar
+   (a manual override from the source month is not carried forward).
 2. Fill in **Income**, **Bills**, **Planned Spending**, **Family Fun Fund**,
-   and **Savings** for the month.
+   and **Savings** for the month — each section supports **Add** and **Add
+   from template** (Admin → Templates & Defaults manages the template list).
 3. **Dashboard** shows per-person and household income, allocations, and
    remaining money at a glance, with strong visual hierarchy on
    remaining/shortfall.
 4. **Breakdown** page adds a plan check (over/under allocated), contribution
    breakdown (% of income vs. % of allocations — informational only),
    category breakdown, and month-to-month comparison.
-5. **Print** page produces a print-friendly summary (nav/admin hidden via
-   print CSS) for a physical copy of the plan.
+5. **Monthly Review** (Dashboard → "Review this month"): a lightweight,
+   non-blocking walkthrough of Income → Bills → Planned Spending → Family
+   Fun → Savings, each with a "Mark reviewed" action, followed by a final
+   plan-status summary. Marking a section reviewed records a signature of
+   its data; editing an amount, owner, or split afterward shows "Changed
+   since review" rather than silently keeping a stale reviewed state (a
+   note edit alone doesn't invalidate it).
+6. **Print / Save PDF** produces a dedicated, professionally laid-out
+   Monthly Plan Report (see below) — separate from the on-screen Dashboard.
+
+## Print / Save PDF report
+
+The `/print` route renders a dedicated **Monthly Plan Report** — it is not a
+printout of the Dashboard. It includes, in order: a header (household name,
+month, both person names, report generation date), an executive summary
+table (income/bills/planned/Family Fun/savings/allocated/remaining ×
+person1/person2/household), income & paychecks per person (type, frequency,
+per-paycheck amount, pay dates, month total), required bills (category, due
+day, responsibility, split, both shares), planned spending, Family Fun,
+savings, an informational contribution-percentage summary, the month's
+notes, and a final plan status block.
+
+Printing uses the browser's native **Print / Save as PDF** — no server, no
+extra dependency. The print stylesheet (`src/styles/print.css`) is
+independent of the app's Light/Dark theme: it force-overrides the design
+tokens it needs (with `!important`, since a `data-theme="dark"` override
+otherwise wins on specificity) so the printed report is always a plain
+white, high-contrast page regardless of which theme you were using on
+screen. Tables avoid splitting a row across a page break, headers repeat
+where the browser supports it, and the page is sized for US Letter with
+0.6in margins (still readable on A4). The report view also sets the
+document title to `Household-Plan-<month>` while open, so "Save as PDF"
+suggests a sensible filename like `Household-Plan-2026-09.pdf`.
 
 ## Admin Control Center
 
@@ -100,8 +167,11 @@ Reachable from the **Admin** nav item, organized into tabs:
 - **Household** — person display names, app name, currency, default split method.
 - **Categories** — add, rename, reorder, archive/restore. Archiving a
   category never destroys historical entries that reference it.
-- **Templates & Defaults** — recurring income templates and per-section
-  (bill/planned/family fun/savings) templates as a reference list.
+- **Templates & Defaults** — recurring income templates (including full
+  paycheck schedules) and per-section (bill/planned/family fun/savings)
+  templates, each with full create/edit/duplicate/archive/restore. These
+  power the **Add from template** quick-add on the Income and expense
+  section pages.
 - **Appearance** — Light / Dark / System theme, persisted locally.
 - **Months** — read-only overview of all plans (create/delete happens on the
   Months page).
@@ -109,7 +179,10 @@ Reachable from the **Admin** nav item, organized into tabs:
   confirmation).
 - **Data Health** — a lightweight integrity checker: split reconciliation,
   percentage ranges, orphaned category references, duplicate months, invalid
-  currency values, schema version support.
+  currency values, schema version support, and paycheck-specific checks
+  (valid income type/frequency/anchor date/semi-monthly schedule, no
+  implausible paycheck count, a paycheck missing its schedule flagged as a
+  warning rather than a hard error since it just contributes $0 until set).
 
 Admin is a household configuration center, not an authentication boundary —
 this is a private, local-first, single-household app. The repository layer
@@ -119,7 +192,13 @@ introduced.
 ## Data persistence, backup & restore
 
 - All data lives in **IndexedDB** in the browser (`idb` library), versioned
-  via `CURRENT_SCHEMA_VERSION` in `src/data/database/schema.ts`.
+  via `CURRENT_SCHEMA_VERSION` in `src/data/database/schema.ts`. The
+  paycheck-frequency income model and Monthly Review state were added as
+  additive fields (no IndexedDB store/index migration needed); a repository
+  read normalizes any pre-upgrade record on the fly
+  (`normalizeIncomeEntry`/`normalizeMonthlyPlan`) — a legacy income entry's
+  amount is preserved exactly as-is under income type "Irregular / Custom",
+  never reinterpreted as a per-paycheck amount.
 - **Export**: Admin → Data → Export backup downloads a JSON file containing
   schema version, app version, household config, categories, all monthly
   plans, all income/expense entries, templates, and preferences.

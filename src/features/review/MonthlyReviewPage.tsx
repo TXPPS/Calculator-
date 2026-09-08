@@ -168,7 +168,7 @@ export function MonthlyReviewPage() {
           </div>
         </div>
         <div className="two-column">
-          <div className="plan-check">
+          <div className="review-person-remaining">
             <div className="plan-check__row">
               <span>{household.personNames.person1} remaining</span>
               <Money cents={summary.remaining.person1Cents} colorize />
@@ -177,7 +177,7 @@ export function MonthlyReviewPage() {
               <p className="warning-text">{household.personNames.person1} is overallocated this month.</p>
             )}
           </div>
-          <div className="plan-check">
+          <div className="review-person-remaining">
             <div className="plan-check__row">
               <span>{household.personNames.person2} remaining</span>
               <Money cents={summary.remaining.person2Cents} colorize />

@@ -20,7 +20,12 @@ export function PaycheckScheduleFields({ schedule, onChange }: PaycheckScheduleF
         <span className="field__label">Frequency</span>
         <select
           value={schedule.frequency}
-          onChange={(e) => onChange(defaultPaycheckSchedule(e.target.value as PayFrequency))}
+          onChange={(e) =>
+            onChange({
+              ...defaultPaycheckSchedule(e.target.value as PayFrequency),
+              perPaycheckCents: schedule.perPaycheckCents,
+            })
+          }
         >
           {(Object.keys(FREQUENCY_LABELS) as PayFrequency[]).map((f) => (
             <option key={f} value={f}>

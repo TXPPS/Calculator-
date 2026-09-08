@@ -18,6 +18,13 @@ const REVIEW_LABELS: Record<ReviewSectionKey, string> = {
   savings: 'Savings',
 };
 
+const FREQUENCY_LABELS: Record<string, string> = {
+  weekly: 'Weekly',
+  biweekly: 'Biweekly',
+  semiMonthly: 'Semi-Monthly',
+  monthly: 'Monthly',
+};
+
 const SPLIT_LABELS: Record<string, string> = {
   even: '50 / 50',
   percentage: 'Percentage',
@@ -79,7 +86,7 @@ export function PrintPage() {
             ? 'One-time'
             : 'Irregular'}
         </td>
-        <td>{isPaycheck ? entry.paycheck!.frequency : '—'}</td>
+        <td>{isPaycheck ? FREQUENCY_LABELS[entry.paycheck!.frequency] ?? entry.paycheck!.frequency : '—'}</td>
         <td className="is-numeric">{isPaycheck ? formatCents(entry.paycheck!.perPaycheckCents) : '—'}</td>
         <td className="is-numeric">{isPaycheck ? entry.expectedOccurrences ?? 0 : '—'}</td>
         <td>{isPaycheck && entry.payDates.length > 0 ? entry.payDates.map(formatPayDateShort).join(', ') : '—'}</td>
@@ -276,7 +283,7 @@ export function PrintPage() {
                     <th>Source</th>
                     <th>Type</th>
                     <th>Frequency</th>
-                    <th className="is-numeric">Per paycheck</th>
+                    <th className="is-numeric">Per check</th>
                     <th className="is-numeric">Checks</th>
                     <th>Pay dates</th>
                     <th className="is-numeric">Total</th>

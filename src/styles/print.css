@@ -53,8 +53,14 @@
 
   .print-summary {
     display: block !important;
+    /* Anchor to the top-left only (not `inset: 0`) — pinning all four sides
+       would constrain this element's height to exactly one page/viewport,
+       clipping every section past the first printed page. Left unconstrained
+       on the bottom, it grows to its natural content height and Chromium's
+       print pagination can break it across as many pages as it needs. */
     position: absolute;
-    inset: 0;
+    top: 0;
+    left: 0;
     width: 100%;
     margin: 0;
     padding: 0;
@@ -159,6 +165,12 @@
   width: 100%;
   border-collapse: collapse;
   font-size: 0.85rem;
+  /* Fixed layout caps the table at the page's content width regardless of
+     column count or cell content (a long bill/category name, or the widest
+     table — Required Bills, with its extra Due column — would otherwise
+     grow the table past the printable page and clip trailing columns).
+     Text wraps within its cell instead. */
+  table-layout: fixed;
 }
 
 .report-table th,
@@ -167,6 +179,7 @@
   padding: 6px 8px;
   border-bottom: 1px solid var(--color-border);
   vertical-align: top;
+  overflow-wrap: break-word;
 }
 
 .report-table th {
@@ -180,7 +193,28 @@
 .report-table td.is-numeric,
 .report-table th.is-numeric {
   text-align: right;
+  width: 11%;
+}
+
+.report-table td.is-numeric {
+  /* Values ("$1,234.56") are short and always fit their column on one line.
+     Headers ("Jordan share") are longer than the narrow numeric column and
+     need to wrap to a second line instead of colliding with the next
+     column — see the sibling rule below, which deliberately omits nowrap. */
   white-space: nowrap;
+}
+
+/* Give the name column (always first) and, where present, the category
+   column (always second) more of the fixed table width than the narrow
+   due/responsibility/split columns, so a long bill or category name wraps
+   across fewer lines instead of splitting after nearly every character. */
+.report-table th:first-child,
+.report-table td:first-child {
+  width: 21%;
+}
+.report-table th:nth-child(2):not(.is-numeric),
+.report-table td:nth-child(2):not(.is-numeric) {
+  width: 15%;
 }
 
 .report-table tfoot td {

@@ -140,6 +140,11 @@
   /* Lets the select inside shrink (and truncate its long option text)
      instead of forcing this flex item past the width of its container. */
   min-width: 0;
+  /* Share available row width evenly with sibling .field--inline items
+     (e.g. two currency inputs in an exact-dollar split, or the paycheck
+     override's count/total pair) instead of sizing to content and
+     overflowing the modal. */
+  flex: 1 1 0;
 }
 
 .field--checkbox {
@@ -261,6 +266,10 @@ textarea {
   background: var(--color-input-bg);
   min-height: var(--touch-target);
   padding-inline: var(--space-3);
+  /* Without this, a currency input placed alongside a sibling field in a
+     row (e.g. .split-percentage-row) won't shrink below its text input's
+     default intrinsic width and overflows its container. */
+  min-width: 0;
 }
 
 .currency-input__prefix {
@@ -272,6 +281,7 @@ textarea {
   border: none;
   background: transparent;
   flex: 1;
+  min-width: 0;
   min-height: var(--touch-target);
   padding: 0;
 }

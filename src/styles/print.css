@@ -1,0 +1,32 @@
+@media print {
+  body {
+    background: #ffffff;
+    color: #000000;
+  }
+
+  .app-nav,
+  .app-header-actions,
+  .no-print,
+  button:not(.print-visible) {
+    display: none !important;
+  }
+
+  .print-summary {
+    display: block !important;
+  }
+
+  a {
+    color: #000000;
+    text-decoration: none;
+  }
+
+  .card {
+    box-shadow: none;
+    border: 1px solid #ccc;
+    break-inside: avoid;
+  }
+
+  @page {
+    margin: 0.6in;
+  }
+}

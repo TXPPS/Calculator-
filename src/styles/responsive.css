@@ -1,0 +1,57 @@
+/* Mobile-first base already covers phones. Progressive enhancement below. */
+
+@media (min-width: 900px) {
+  .app-header__menu-btn {
+    display: none;
+  }
+
+  .app-nav {
+    display: flex;
+    width: 220px;
+    flex-shrink: 0;
+  }
+
+  .app-nav.is-open {
+    position: static;
+    top: auto;
+    box-shadow: none;
+  }
+}
+
+@media (max-width: 899px) {
+  .app-nav:not(.is-open) {
+    display: none;
+  }
+}
+
+@media (min-width: 640px) {
+  .split-percentage-row {
+    flex-wrap: nowrap;
+  }
+}
+
+@media (max-width: 480px) {
+  .modal {
+    padding: var(--space-4);
+  }
+
+  .entry-card__title-row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--space-1);
+  }
+
+  .page__header {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .page__header .btn {
+    width: 100%;
+  }
+}
+
+/* Ensure tables inside print-preview never force page-level horizontal scroll on small screens */
+.print-summary {
+  overflow-x: auto;
+}

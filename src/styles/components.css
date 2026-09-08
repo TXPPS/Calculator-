@@ -906,28 +906,152 @@ textarea {
   width: 100%;
 }
 
-/* ---------- Print ---------- */
-.print-summary {
-  display: none;
-}
-.print-summary table {
-  width: 100%;
-  border-collapse: collapse;
-  margin-top: var(--space-2);
-}
-.print-summary th,
-.print-summary td {
-  text-align: left;
-  padding: var(--space-2);
-  border-bottom: 1px solid var(--color-border);
-}
-.print-section {
-  margin-bottom: var(--space-6);
+/* Print/report layout lives entirely in print.css (.report-* classes). */
+
+/* ---------- Page header actions ---------- */
+.page__header-actions {
+  display: flex;
+  gap: var(--space-2);
+  flex-wrap: wrap;
 }
 
-@media screen {
-  .print-summary {
-    display: flex;
-    flex-direction: column;
-  }
+/* ---------- Admin section header (template editors) ---------- */
+.admin-section__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin-top: var(--space-6);
+}
+.admin-section__header:first-child {
+  margin-top: 0;
+}
+
+/* ---------- Extra chip variants ---------- */
+.chip--warning {
+  background: var(--color-warning-soft);
+  color: var(--color-warning);
+  border-color: transparent;
+}
+.chip--accent {
+  background: var(--color-accent-soft);
+  color: var(--color-accent);
+  border-color: transparent;
+}
+.chip--positive {
+  background: var(--color-positive-soft);
+  color: var(--color-positive);
+  border-color: transparent;
+}
+
+/* ---------- Paycheck schedule + preview (Income form) ---------- */
+.paycheck-schedule {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  background: var(--color-surface-raised);
+  border-radius: var(--radius-md);
+}
+
+.paycheck-preview {
+  padding: var(--space-3) var(--space-4);
+  background: var(--color-accent-soft);
+  border-radius: var(--radius-md);
+  font-size: 0.9rem;
+}
+.paycheck-preview p {
+  margin: 0;
+}
+.paycheck-preview p + p {
+  margin-top: var(--space-1);
+}
+
+/* ---------- Income entry cards ---------- */
+.income-entry-card__schedule {
+  font-size: 0.9rem;
+  color: var(--color-text-secondary);
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.income-entry-card__paydates {
+  color: var(--color-text-muted);
+}
+.income-page__notice {
+  background: var(--color-accent-soft);
+  color: var(--color-accent);
+  border-radius: var(--radius-md);
+  padding: var(--space-2) var(--space-4);
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+/* ---------- Monthly Review ---------- */
+.review-progress {
+  flex-direction: row;
+  align-items: center;
+  gap: var(--space-4);
+}
+.review-progress__track {
+  flex: 1;
+  height: 10px;
+  border-radius: var(--radius-pill);
+  background: var(--color-surface-raised);
+  overflow: hidden;
+}
+.review-progress__fill {
+  height: 100%;
+  background: var(--color-accent);
+  border-radius: var(--radius-pill);
+  transition: width var(--transition-base);
+}
+
+.review-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+.review-card {
+  flex-direction: row;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--space-4);
+  border-left: 4px solid var(--color-border-strong);
+}
+.review-card.is-reviewed {
+  border-left-color: var(--color-positive);
+}
+.review-card__main {
+  flex: 1;
+  min-width: 220px;
+}
+.review-card__title-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: var(--space-3);
+}
+.review-card__title-row h2 {
+  font-size: 1.05rem;
+}
+.review-card__status {
+  margin-top: var(--space-2);
+}
+.review-card__actions {
+  display: flex;
+  gap: var(--space-2);
+  flex-wrap: wrap;
+}
+
+.monthly-review-summary {
+  border-left: 4px solid var(--color-positive);
+}
+.monthly-review-summary.is-negative {
+  border-left-color: var(--color-danger);
 }

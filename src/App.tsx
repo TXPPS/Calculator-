@@ -12,6 +12,7 @@ import { SavingsPage } from './features/savings/SavingsPage';
 import { MonthsPage } from './features/months/MonthsPage';
 import { AdminPage } from './features/admin/AdminPage';
 import { PrintPage } from './features/print/PrintPage';
+import { MonthlyReviewPage } from './features/review/MonthlyReviewPage';
 
 export function App() {
   const { loading, household, refreshHousehold } = useAppData();
@@ -35,6 +36,7 @@ export function App() {
         <Route path="/family-fun" element={<FamilyFunPage />} />
         <Route path="/savings" element={<SavingsPage />} />
         <Route path="/breakdown" element={<BreakdownPage />} />
+        <Route path="/review" element={<MonthlyReviewPage />} />
         <Route path="/months" element={<MonthsPage />} />
         <Route path="/admin" element={<AdminPage />} />
       </Route>

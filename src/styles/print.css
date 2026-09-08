@@ -1,32 +1,251 @@
+/* ==========================================================================
+   Monthly Plan Report — print / Save-as-PDF stylesheet.
+   Independent of the app's Light/Dark theme: every token this stylesheet
+   cares about is forced with !important inside @media print so a dark-mode
+   session still produces a plain white, high-contrast printed report.
+   ========================================================================== */
+
+.print-summary {
+  display: none;
+}
+
+@media screen {
+  .print-summary {
+    display: block;
+  }
+}
+
 @media print {
-  body {
-    background: #ffffff;
-    color: #000000;
+  :root {
+    --color-bg: #ffffff !important;
+    --color-surface: #ffffff !important;
+    --color-surface-raised: #f4f5f3 !important;
+    --color-card: #ffffff !important;
+    --color-border: #c9cdc6 !important;
+    --color-border-strong: #9aa199 !important;
+    --color-text: #101312 !important;
+    --color-text-secondary: #33372f !important;
+    --color-text-muted: #55584f !important;
+    --color-accent: #0f5c53 !important;
+    --color-accent-soft: #e4efec !important;
+    --color-person1: #0f5c53 !important;
+    --color-person2: #4a3b78 !important;
+    --color-positive: #146c3a !important;
+    --color-positive-soft: #e6f4ea !important;
+    --color-warning: #8a4a06 !important;
+    --color-danger: #9c241b !important;
+    --color-danger-soft: #fbe7e5 !important;
   }
 
-  .app-nav,
-  .app-header-actions,
-  .no-print,
-  button:not(.print-visible) {
-    display: none !important;
+  html,
+  body {
+    background: #ffffff !important;
+  }
+
+  body * {
+    visibility: hidden;
+  }
+
+  .print-summary,
+  .print-summary * {
+    visibility: visible;
   }
 
   .print-summary {
     display: block !important;
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    margin: 0;
+    padding: 0;
+    background: #ffffff !important;
+    color: var(--color-text);
+  }
+
+  .no-print,
+  .app-nav,
+  .app-header,
+  .app-nav-backdrop,
+  button:not(.print-visible) {
+    display: none !important;
   }
 
   a {
-    color: #000000;
+    color: inherit;
     text-decoration: none;
   }
 
-  .card {
-    box-shadow: none;
-    border: 1px solid #ccc;
+  .report-header {
+    break-after: avoid;
+  }
+
+  .report-section {
+    break-inside: avoid;
+    margin-bottom: 18px;
+  }
+
+  .report-section table {
+    break-inside: auto;
+  }
+
+  .report-section tr {
+    break-inside: avoid;
+  }
+
+  .report-section thead {
+    display: table-header-group;
+  }
+
+  .report-hero {
     break-inside: avoid;
   }
 
   @page {
+    size: letter;
     margin: 0.6in;
   }
+}
+
+/* ---------- Report layout (also viewable on-screen as a preview) ---------- */
+
+.print-summary {
+  font-size: 13px;
+  line-height: 1.4;
+  color: var(--color-text);
+  max-width: 8.5in;
+  margin: 0 auto;
+  padding: var(--space-6);
+}
+
+.report-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: var(--space-4);
+  border-bottom: 2px solid var(--color-border-strong);
+  padding-bottom: var(--space-4);
+  margin-bottom: var(--space-5);
+}
+
+.report-header__title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin: 0 0 4px;
+}
+
+.report-header__subtitle {
+  color: var(--color-text-secondary);
+  margin: 0;
+}
+
+.report-header__meta {
+  text-align: right;
+  font-size: 0.85rem;
+  color: var(--color-text-muted);
+}
+
+.report-section {
+  margin-bottom: var(--space-6);
+}
+
+.report-section h2 {
+  font-size: 1.05rem;
+  border-bottom: 1px solid var(--color-border);
+  padding-bottom: 6px;
+  margin-bottom: var(--space-3);
+}
+
+.report-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.85rem;
+}
+
+.report-table th,
+.report-table td {
+  text-align: left;
+  padding: 6px 8px;
+  border-bottom: 1px solid var(--color-border);
+  vertical-align: top;
+}
+
+.report-table th {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  color: var(--color-text-muted);
+  border-bottom: 2px solid var(--color-border-strong);
+}
+
+.report-table td.is-numeric,
+.report-table th.is-numeric {
+  text-align: right;
+  white-space: nowrap;
+}
+
+.report-table tfoot td {
+  font-weight: 700;
+  border-top: 2px solid var(--color-border-strong);
+  border-bottom: none;
+}
+
+.report-hero {
+  background: var(--color-surface-raised);
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-md);
+  padding: var(--space-4) var(--space-5);
+  margin-bottom: var(--space-5);
+}
+
+.report-hero__row {
+  display: flex;
+  justify-content: space-between;
+  padding: 3px 0;
+}
+
+.report-hero__row--emphasis {
+  font-size: 1.15rem;
+  font-weight: 700;
+  border-top: 1px solid var(--color-border-strong);
+  margin-top: 6px;
+  padding-top: 8px;
+}
+
+.report-hero__row--emphasis.is-negative {
+  color: var(--color-danger);
+}
+
+.report-hero__row--emphasis.is-positive {
+  color: var(--color-positive);
+}
+
+.report-notice {
+  font-size: 0.85rem;
+  color: var(--color-danger);
+  font-weight: 600;
+}
+
+.report-notes {
+  white-space: pre-wrap;
+}
+
+.report-footer {
+  margin-top: var(--space-6);
+  padding-top: var(--space-3);
+  border-top: 1px solid var(--color-border);
+  font-size: 0.8rem;
+  color: var(--color-text-muted);
+  display: flex;
+  justify-content: space-between;
+}
+
+.report-person-block + .report-person-block {
+  margin-top: var(--space-4);
+}
+
+.report-person-block__total {
+  display: flex;
+  justify-content: space-between;
+  font-weight: 700;
+  margin-top: 6px;
 }

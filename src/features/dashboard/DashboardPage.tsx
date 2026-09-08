@@ -167,11 +167,14 @@ export function DashboardPage() {
       </div>
 
       <div className="dashboard-links">
+        <Link to="/review" className="btn btn--primary">
+          Review this month
+        </Link>
         <Link to="/breakdown" className="btn btn--secondary">
           View breakdown &amp; plan check
         </Link>
         <Link to="/print" className="btn btn--ghost">
-          Printable summary
+          Printable report
         </Link>
       </div>
     </section>

@@ -5,7 +5,12 @@ import { CategorySelect } from './CategorySelect';
 import { SplitEditor } from './SplitEditor';
 import { ExpenseEntry, ExpenseSection } from '../../domain/expenses/types';
 import { Owner, Split, defaultSplitFor } from '../../domain/splits/types';
-import { validateAmountCents, validateDueDay, validateName } from '../../domain/calculations/validation';
+import {
+  validateAmountCents,
+  validateDueDay,
+  validateName,
+  validateSplitForOwner,
+} from '../../domain/calculations/validation';
 import { useAppData } from '../../context/AppDataContext';
 
 export interface ExpenseFormValues {
@@ -61,7 +66,11 @@ export function ExpenseEntryForm({
     const categoryCheck =
       requireCategory && !categoryId ? { valid: false, error: 'Please select a category.' } : { valid: true };
 
-    const found = [nameCheck, amountCheck, dueDayCheck, categoryCheck].filter((r) => !r.valid);
+    const splitCheck = validateSplitForOwner(owner, split, amountCents);
+
+    const found = [nameCheck, amountCheck, dueDayCheck, categoryCheck, splitCheck].filter(
+      (r) => !r.valid
+    );
     if (found.length > 0) {
       setErrors(found.map((r) => r.error!).filter(Boolean));
       return;

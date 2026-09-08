@@ -4,6 +4,7 @@ import {
   validateName,
   validatePercent,
   validateExactSplit,
+  validateSplitForOwner,
   validateDueDay,
   validateMonthKey,
 } from '../../domain/calculations/validation';
@@ -45,6 +46,36 @@ describe('validation', () => {
     expect(validateDueDay(32).valid).toBe(false);
     expect(validateDueDay(15).valid).toBe(true);
     expect(validateDueDay(null).valid).toBe(true);
+  });
+
+  it('blocks a shared exact split whose person1Cents exceeds the total (the form-save gate)', () => {
+    expect(
+      validateSplitForOwner('both', { method: 'exact', person1Cents: 15000 }, 10000).valid
+    ).toBe(false);
+    expect(
+      validateSplitForOwner('both', { method: 'exact', person1Cents: -1 }, 10000).valid
+    ).toBe(false);
+    expect(
+      validateSplitForOwner('both', { method: 'exact', person1Cents: 5000 }, 10000).valid
+    ).toBe(true);
+  });
+
+  it('blocks a shared percentage split outside 0-100 (the form-save gate)', () => {
+    expect(
+      validateSplitForOwner('both', { method: 'percentage', person1Percent: 150 }, 10000).valid
+    ).toBe(false);
+    expect(
+      validateSplitForOwner('both', { method: 'percentage', person1Percent: -10 }, 10000).valid
+    ).toBe(false);
+    expect(
+      validateSplitForOwner('both', { method: 'percentage', person1Percent: 60 }, 10000).valid
+    ).toBe(true);
+  });
+
+  it('does not validate a split when the item is not shared (owner is a single person)', () => {
+    expect(
+      validateSplitForOwner('person1', { method: 'exact', person1Cents: 999999 }, 100).valid
+    ).toBe(true);
   });
 
   it('validates month key format', () => {

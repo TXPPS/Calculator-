@@ -36,6 +36,27 @@ export function validateExactSplit(
   return { valid: true };
 }
 
+/**
+ * Validates the split configuration for a shared ('both') line item before it
+ * is saved. Prevents an exact split from exceeding (or going negative on) the
+ * total, and a percentage split from landing outside 0-100. Owners other than
+ * 'both' have no split to validate.
+ */
+export function validateSplitForOwner(
+  owner: 'person1' | 'person2' | 'both',
+  split: { method: string; person1Cents?: number; person1Percent?: number },
+  amountCents: number
+): ValidationResult {
+  if (owner !== 'both') return { valid: true };
+  if (split.method === 'exact') {
+    return validateExactSplit(split.person1Cents ?? 0, amountCents);
+  }
+  if (split.method === 'percentage') {
+    return validatePercent(split.person1Percent ?? 0);
+  }
+  return { valid: true };
+}
+
 export function validateDueDay(day: number | null): ValidationResult {
   if (day === null) return { valid: true };
   if (!Number.isInteger(day) || day < 1 || day > 31)

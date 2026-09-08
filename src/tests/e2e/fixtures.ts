@@ -43,7 +43,11 @@ export async function addIncome(page: Page, opts: IncomeOpts) {
   await dialog.getByLabel('Description').fill(opts.description);
   await dialog.getByLabel('Expected amount this month').fill(opts.amount);
   if (opts.recurring === false) {
-    await dialog.getByLabel(/Recurring/).uncheck();
+    // getByLabel(/Recurring/) is ambiguous now that the income-type <select>
+    // has an "Other Recurring Income" option — an implicit-label wrapping
+    // <select>'s accessible name includes its option text, so the regex also
+    // matches the select. Target the checkbox role directly instead.
+    await dialog.getByRole('checkbox', { name: /Recurring/ }).uncheck();
   }
   await dialog.getByRole('button', { name: 'Save' }).click();
   await dialog.waitFor({ state: 'detached' });
@@ -115,7 +119,7 @@ export async function addExpense(page: Page, opts: ExpenseOpts) {
   }
 
   if (opts.recurring === false) {
-    await dialog.getByLabel(/Recurring/).uncheck();
+    await dialog.getByRole('checkbox', { name: /Recurring/ }).uncheck();
   }
 
   if (opts.notes) {

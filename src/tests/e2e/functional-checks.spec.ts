@@ -146,7 +146,8 @@ test.describe('functional correctness checks', () => {
       owner: 'person1',
     });
 
-    await page.goto('/print');
+    // HashRouter: the route lives in the hash, not the path.
+    await page.goto('/#/print');
     await expect(page.getByText('Print Test Paycheck')).toBeVisible();
     await expect(page.getByText('Print Test Bill')).toBeVisible();
     await expect(page.getByText('$1,234.00').first()).toBeVisible();

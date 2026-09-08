@@ -59,6 +59,13 @@ export function AppShell() {
       </header>
 
       <div className="app-body">
+        {menuOpen && (
+          <div
+            className="app-nav-backdrop no-print"
+            aria-hidden="true"
+            onClick={() => setMenuOpen(false)}
+          />
+        )}
         <nav
           id="app-nav"
           className={`app-nav no-print ${menuOpen ? 'is-open' : ''}`}

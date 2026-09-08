@@ -99,7 +99,7 @@ test.describe('functional correctness checks', () => {
     // Edit the copy and confirm the original is untouched.
     await copyCard.getByRole('button', { name: 'Edit' }).click();
     const dialog = page.getByRole('dialog');
-    await dialog.getByLabel('Amount').fill('999');
+    await dialog.locator('.currency-input__field').first().fill('999');
     await dialog.getByRole('button', { name: 'Save' }).click();
     await dialog.waitFor({ state: 'detached' });
 
@@ -149,7 +149,7 @@ test.describe('functional correctness checks', () => {
     await page.goto('/print');
     await expect(page.getByText('Print Test Paycheck')).toBeVisible();
     await expect(page.getByText('Print Test Bill')).toBeVisible();
-    await expect(page.getByText('$1,234.00')).toBeVisible();
+    await expect(page.getByText('$1,234.00').first()).toBeVisible();
   });
 
   test('archiving a category does not remove it from historical entries', async ({ page }) => {

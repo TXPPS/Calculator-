@@ -16,6 +16,13 @@
     top: auto;
     box-shadow: none;
   }
+
+  /* The sidebar is always visible at this width, so the mobile drawer's
+     backdrop scrim (a leftover from a menuOpen state set before the
+     viewport widened) should never show here. */
+  .app-nav-backdrop {
+    display: none;
+  }
 }
 
 @media (max-width: 899px) {

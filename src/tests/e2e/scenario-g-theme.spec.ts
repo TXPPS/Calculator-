@@ -14,6 +14,11 @@ test('theme choice persists across a page reload', async ({ page }) => {
   // Switch to Dark.
   await page.getByRole('radio', { name: /^Dark/ }).check();
   await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark');
+  // The preference write to IndexedDB is fire-and-forget from the UI's
+  // perspective (there's no "Saved" indicator to wait on for a plain radio
+  // toggle) — give it a moment to land before reloading, the way a real
+  // user's reaction time would rather than Playwright's instant reload.
+  await page.waitForTimeout(200);
   await page.reload();
   await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark');
   // The admin tab selection itself is local UI state and resets on reload;
@@ -24,6 +29,7 @@ test('theme choice persists across a page reload', async ({ page }) => {
   // Switch to Light.
   await page.getByRole('radio', { name: /^Light/ }).check();
   await expect(page.locator('html')).toHaveAttribute('data-theme', 'light');
+  await page.waitForTimeout(200);
   await page.reload();
   await expect(page.locator('html')).toHaveAttribute('data-theme', 'light');
   await openAppearanceTab(page);
@@ -32,6 +38,7 @@ test('theme choice persists across a page reload', async ({ page }) => {
   // Switch to System — should remove the explicit attribute entirely.
   await page.getByRole('radio', { name: /^System/ }).check();
   await expect(page.locator('html')).not.toHaveAttribute('data-theme');
+  await page.waitForTimeout(200);
   await page.reload();
   await expect(page.locator('html')).not.toHaveAttribute('data-theme');
   await openAppearanceTab(page);

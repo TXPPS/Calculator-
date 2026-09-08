@@ -137,6 +137,9 @@
   flex-direction: row;
   align-items: center;
   gap: var(--space-2);
+  /* Lets the select inside shrink (and truncate its long option text)
+     instead of forcing this flex item past the width of its container. */
+  min-width: 0;
 }
 
 .field--checkbox {
@@ -455,6 +458,22 @@ textarea {
   display: flex;
   gap: var(--space-4);
   flex-wrap: wrap;
+}
+
+/* A <select> sizes itself to fit its widest *option*, not just the
+   selected value — so a long category name can force this box (and the
+   page) wider than the viewport. Let the flex item shrink and make the
+   select fill that shrunk width instead of its own content-driven size,
+   so the label truncates rather than overflowing. */
+.filter-bar > .field--inline {
+  flex: 1 1 160px;
+  min-width: 0;
+  max-width: 100%;
+}
+
+.filter-bar > .field--inline select {
+  width: 100%;
+  min-width: 0;
 }
 
 .empty-state {
@@ -827,6 +846,18 @@ textarea {
   z-index: 30;
   overflow-y: auto;
   box-shadow: var(--shadow-lg);
+}
+
+.app-nav-backdrop {
+  position: fixed;
+  top: 64px;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(10, 12, 11, 0.5);
+  z-index: 25;
+  border: none;
+  padding: 0;
 }
 
 .app-nav__link {

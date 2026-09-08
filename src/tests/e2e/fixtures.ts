@@ -77,7 +77,12 @@ export async function addExpense(page: Page, opts: ExpenseOpts) {
     await dialog.locator('select').first().selectOption({ label: opts.category });
   }
 
-  await dialog.getByLabel('Amount').fill(opts.amount);
+  // NOTE: dialog.getByLabel('Amount') is unreliable here — Playwright's
+  // implicit-label resolution occasionally also matches the unrelated
+  // "Split method" <select> further down the form even though their
+  // accessible names are distinct (confirmed via ariaSnapshot). The Amount
+  // currency input is always the first ".currency-input__field" in the form.
+  await dialog.locator('.currency-input__field').first().fill(opts.amount);
 
   const owner = opts.owner ?? 'both';
   if (owner === 'both') {

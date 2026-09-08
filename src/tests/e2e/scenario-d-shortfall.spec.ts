@@ -23,7 +23,7 @@ test('household shortfall message appears when overallocated and disappears once
   await goTo(page, 'Bills');
   await page.locator('.entry-card', { hasText: 'Big Rent' }).getByRole('button', { name: 'Edit' }).click();
   const dialog = page.getByRole('dialog');
-  await dialog.getByLabel('Amount').fill('500');
+  await dialog.locator('.currency-input__field').first().fill('500');
   await dialog.getByRole('button', { name: 'Save' }).click();
   await dialog.waitFor({ state: 'detached' });
 

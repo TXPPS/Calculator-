@@ -160,6 +160,16 @@ export function MonthsPage() {
   const [createOpen, setCreateOpen] = useState(false);
   const [notes, setNotes] = useState(selectedMonth?.notes ?? '');
 
+  // The notes textarea is local, editable draft state, but it must be
+  // reset whenever the selected month itself changes (switching months,
+  // creating a new one, etc.) — otherwise it keeps showing the previous
+  // month's notes, and blurring it would silently overwrite the new
+  // month's notes with stale text.
+  useEffect(() => {
+    setNotes(selectedMonth?.notes ?? '');
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedMonth?.id]);
+
   const sortedMonths = [...months].sort((a, b) => b.monthKey.localeCompare(a.monthKey));
 
   const saveNotes = async () => {

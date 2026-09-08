@@ -51,6 +51,11 @@ textarea {
   background: var(--color-input-bg);
   border: 1px solid var(--color-input-border);
   border-radius: var(--radius-sm);
+  /* A <select> otherwise sizes itself to its widest option (e.g. a long
+     category name), which can push it past the viewport and force
+     page-level horizontal scroll. Cap it and let the label text truncate
+     instead. */
+  max-width: 100%;
 }
 
 input[type='checkbox'],

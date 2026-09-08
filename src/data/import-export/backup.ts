@@ -6,6 +6,8 @@ import { MonthlyPlan } from '../../domain/monthly-plan/types';
 import { IncomeEntry, IncomeTemplate } from '../../domain/income/types';
 import { ExpenseEntry, ExpenseTemplate } from '../../domain/expenses/types';
 import { Preferences } from '../database/schema';
+import { normalizeIncomeEntry } from '../../domain/income/incomeCalculations';
+import { normalizeMonthlyPlan } from '../../domain/monthly-plan/types';
 
 export interface BackupFile {
   schemaVersion: number;
@@ -52,8 +54,8 @@ export async function exportBackup(): Promise<BackupFile> {
       schemaVersion: CURRENT_SCHEMA_VERSION,
     },
     categories,
-    months,
-    incomeEntries,
+    months: months.map(normalizeMonthlyPlan),
+    incomeEntries: incomeEntries.map(normalizeIncomeEntry),
     expenseEntries,
     incomeTemplates,
     expenseTemplates,
@@ -126,8 +128,10 @@ export async function importBackup(data: BackupFile): Promise<BackupFile> {
   await tx.objectStore('household').put(data.household);
   await tx.objectStore('preferences').put(data.preferences);
   await Promise.all(data.categories.map((c) => tx.objectStore('categories').put(c)));
-  await Promise.all(data.months.map((m) => tx.objectStore('months').put(m)));
-  await Promise.all(data.incomeEntries.map((e) => tx.objectStore('incomeEntries').put(e)));
+  await Promise.all(data.months.map((m) => tx.objectStore('months').put(normalizeMonthlyPlan(m))));
+  await Promise.all(
+    data.incomeEntries.map((e) => tx.objectStore('incomeEntries').put(normalizeIncomeEntry(e)))
+  );
   await Promise.all(data.expenseEntries.map((e) => tx.objectStore('expenseEntries').put(e)));
   await Promise.all(data.incomeTemplates.map((t) => tx.objectStore('incomeTemplates').put(t)));
   await Promise.all(data.expenseTemplates.map((t) => tx.objectStore('expenseTemplates').put(t)));

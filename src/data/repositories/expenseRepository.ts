@@ -63,4 +63,12 @@ export const expenseTemplateRepository = {
     if (!existing) return;
     await db.put('expenseTemplates', { ...existing, archived });
   },
+  async duplicate(id: string): Promise<ExpenseTemplate | undefined> {
+    const db = await getDb();
+    const existing = await db.get('expenseTemplates', id);
+    if (!existing) return undefined;
+    const copy: ExpenseTemplate = { ...existing, id: uuid(), name: `${existing.name} (copy)`, archived: false };
+    await db.put('expenseTemplates', copy);
+    return copy;
+  },
 };

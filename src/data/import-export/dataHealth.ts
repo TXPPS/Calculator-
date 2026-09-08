@@ -1,6 +1,12 @@
 import { getDb } from '../database/db';
 import { CURRENT_SCHEMA_VERSION } from '../database/schema';
 import { calculateSplit } from '../../domain/splits/calculateSplit';
+import { normalizeIncomeEntry, paycheckScheduleIsComplete } from '../../domain/income/incomeCalculations';
+import { IncomeType } from '../../domain/income/types';
+
+const VALID_INCOME_TYPES: IncomeType[] = ['paycheck', 'otherRecurring', 'oneTime', 'irregular'];
+const VALID_FREQUENCIES = ['weekly', 'biweekly', 'semiMonthly', 'monthly'];
+const ISO_DATE = /^\d{4}-\d{2}-\d{2}$/;
 
 export interface DataHealthIssue {
   severity: 'error' | 'warning';
@@ -36,13 +42,52 @@ export async function runDataHealthCheck(): Promise<DataHealthReport> {
     seenMonthKeys.add(month.monthKey);
   }
 
-  const incomeEntries = await db.getAll('incomeEntries');
+  const rawIncomeEntries = await db.getAll('incomeEntries');
+  const incomeEntries = rawIncomeEntries.map(normalizeIncomeEntry);
   for (const entry of incomeEntries) {
     if (!monthIds.has(entry.monthId)) {
       issues.push({ severity: 'warning', message: `Income entry "${entry.description}" references a missing month.` });
     }
+    if (entry.person !== 'person1' && entry.person !== 'person2') {
+      issues.push({ severity: 'error', message: `Income entry "${entry.description}" has no valid owner.` });
+    }
     if (!Number.isFinite(entry.amountCents) || entry.amountCents < 0) {
       issues.push({ severity: 'error', message: `Income entry "${entry.description}" has an invalid amount.` });
+    }
+    if (!VALID_INCOME_TYPES.includes(entry.incomeType)) {
+      issues.push({ severity: 'error', message: `Income entry "${entry.description}" has an unrecognized income type.` });
+    }
+    if (entry.incomeType === 'paycheck') {
+      if (!entry.paycheck) {
+        issues.push({ severity: 'error', message: `Paycheck entry "${entry.description}" is missing its schedule.` });
+      } else {
+        if (!VALID_FREQUENCIES.includes(entry.paycheck.frequency)) {
+          issues.push({ severity: 'error', message: `Paycheck entry "${entry.description}" has an unrecognized frequency.` });
+        }
+        if (!Number.isFinite(entry.paycheck.perPaycheckCents) || entry.paycheck.perPaycheckCents < 0) {
+          issues.push({ severity: 'error', message: `Paycheck entry "${entry.description}" has an invalid per-paycheck amount.` });
+        }
+        if (
+          (entry.paycheck.frequency === 'weekly' || entry.paycheck.frequency === 'biweekly') &&
+          entry.paycheck.anchorDate !== null &&
+          !ISO_DATE.test(entry.paycheck.anchorDate)
+        ) {
+          issues.push({ severity: 'error', message: `Paycheck entry "${entry.description}" has an invalid pay-date anchor.` });
+        }
+        if (entry.paycheck.frequency === 'semiMonthly' && entry.paycheck.semiMonthly) {
+          const { first, second } = entry.paycheck.semiMonthly;
+          const validPosition = (p: number | 'last') => p === 'last' || (Number.isInteger(p) && p >= 1 && p <= 31);
+          if (!validPosition(first) || !validPosition(second)) {
+            issues.push({ severity: 'error', message: `Paycheck entry "${entry.description}" has an invalid semi-monthly schedule.` });
+          }
+        }
+        if (!paycheckScheduleIsComplete(entry.paycheck)) {
+          issues.push({ severity: 'warning', message: `Paycheck entry "${entry.description}" has no schedule configured yet, so it contributes $0 until one is set.` });
+        }
+      }
+      if (entry.expectedOccurrences !== null && (entry.expectedOccurrences < 0 || entry.expectedOccurrences > 6)) {
+        issues.push({ severity: 'error', message: `Paycheck entry "${entry.description}" has an implausible expected paycheck count.` });
+      }
     }
   }
 

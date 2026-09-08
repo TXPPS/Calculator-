@@ -9,11 +9,31 @@ import { categoryRepository } from '../../data/repositories/categoryRepository';
 import { createMonth } from '../../data/repositories/monthCopyService';
 import { calculatePlanSummary } from '../../domain/calculations/planCalculations';
 import { exportBackup, importBackup, validateBackup } from '../../data/import-export/backup';
+import { IncomeEntry } from '../../domain/income/types';
 
 beforeEach(async () => {
   globalThis.indexedDB = new IDBFactory();
   resetDbConnection();
 });
+
+/** Minimal irregular-income entry for tests that don't exercise the paycheck schedule system. */
+function irregularIncome(
+  overrides: Partial<Omit<IncomeEntry, 'id'>> & { monthId: string; description: string; amountCents: number }
+): Omit<IncomeEntry, 'id'> {
+  return {
+    person: 'person1',
+    incomeType: 'irregular',
+    paycheck: null,
+    isManualOverride: false,
+    calculatedAmountCents: null,
+    expectedOccurrences: null,
+    payDates: [],
+    recurring: true,
+    notes: '',
+    templateId: null,
+    ...overrides,
+  };
+}
 
 describe('monthly plan workflow (integration)', () => {
   it('creates a household, a month, income and bills, and totals update immediately', async () => {
@@ -28,15 +48,9 @@ describe('monthly plan workflow (integration)', () => {
     expect(categories.length).toBeGreaterThan(0);
 
     const month = await monthRepository.create('2026-09');
-    await incomeRepository.create({
-      monthId: month.id,
-      description: 'Paycheck',
-      person: 'person1',
-      amountCents: 400000,
-      recurring: true,
-      notes: '',
-      templateId: null,
-    });
+    await incomeRepository.create(
+      irregularIncome({ monthId: month.id, description: 'Paycheck', amountCents: 400000 })
+    );
     await expenseRepository.create({
       monthId: month.id,
       section: 'bill',
@@ -61,24 +75,12 @@ describe('monthly plan workflow (integration)', () => {
   it('copies only recurring items to a new month, never one-time items or notes', async () => {
     const monthA = await monthRepository.create('2026-09');
     await monthRepository.save({ ...monthA, notes: 'three-paycheck month' });
-    await incomeRepository.create({
-      monthId: monthA.id,
-      description: 'Recurring paycheck',
-      person: 'person1',
-      amountCents: 300000,
-      recurring: true,
-      notes: '',
-      templateId: null,
-    });
-    await incomeRepository.create({
-      monthId: monthA.id,
-      description: 'One-time bonus',
-      person: 'person1',
-      amountCents: 50000,
-      recurring: false,
-      notes: '',
-      templateId: null,
-    });
+    await incomeRepository.create(
+      irregularIncome({ monthId: monthA.id, description: 'Recurring paycheck', amountCents: 300000, recurring: true })
+    );
+    await incomeRepository.create(
+      irregularIncome({ monthId: monthA.id, description: 'One-time bonus', amountCents: 50000, recurring: false })
+    );
     await expenseRepository.create({
       monthId: monthA.id,
       section: 'bill',
@@ -125,15 +127,9 @@ describe('monthly plan workflow (integration)', () => {
 
   it('deletes a month and cascades its entries', async () => {
     const month = await monthRepository.create('2026-09');
-    await incomeRepository.create({
-      monthId: month.id,
-      description: 'Paycheck',
-      person: 'person1',
-      amountCents: 100000,
-      recurring: true,
-      notes: '',
-      templateId: null,
-    });
+    await incomeRepository.create(
+      irregularIncome({ monthId: month.id, description: 'Paycheck', amountCents: 100000 })
+    );
     await monthRepository.delete(month.id);
     const remaining = await incomeRepository.getForMonth(month.id);
     expect(remaining).toHaveLength(0);
@@ -142,15 +138,9 @@ describe('monthly plan workflow (integration)', () => {
 
   it('exports and re-imports a full backup, restoring all data', async () => {
     const month = await monthRepository.create('2026-09');
-    await incomeRepository.create({
-      monthId: month.id,
-      description: 'Paycheck',
-      person: 'person1',
-      amountCents: 100000,
-      recurring: true,
-      notes: '',
-      templateId: null,
-    });
+    await incomeRepository.create(
+      irregularIncome({ monthId: month.id, description: 'Paycheck', amountCents: 100000 })
+    );
 
     const backup = await exportBackup();
     const validation = validateBackup(JSON.parse(JSON.stringify(backup)));

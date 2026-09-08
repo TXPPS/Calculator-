@@ -6,7 +6,15 @@ import { IncomeEntry, IncomeTemplate } from '../../domain/income/types';
 import { ExpenseEntry, ExpenseTemplate } from '../../domain/expenses/types';
 
 export const DB_NAME = 'household-spending-plan';
-export const CURRENT_SCHEMA_VERSION = 1;
+/**
+ * Logical data-shape version, independent of the IndexedDB object-store
+ * version below. Bumped from 1 to 2 for the paycheck/income-frequency
+ * system and Monthly Review state — both are additive (new optional
+ * fields normalized at read time by the repositories), so no IndexedDB
+ * store/index migration was needed, but backups now carry the richer
+ * shape and importing an older (schemaVersion 1) backup remains supported.
+ */
+export const CURRENT_SCHEMA_VERSION = 2;
 
 export type ThemePreference = 'light' | 'dark' | 'system';
 

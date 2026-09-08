@@ -6,6 +6,7 @@ import { ExpenseEntryForm, ExpenseFormValues } from './ExpenseEntryForm';
 import { ExpenseEntryList } from './ExpenseEntryList';
 import { EmptyState } from './EmptyState';
 import { Money } from './Money';
+import { QuickAddExpenseModal } from './QuickAddExpenseModal';
 
 interface ExpenseSectionPageProps {
   section: ExpenseSection;
@@ -32,6 +33,7 @@ export function ExpenseSectionPage({
 }: ExpenseSectionPageProps) {
   const { selectedMonth, expenseEntries, refreshEntries, household, categories } = useAppData();
   const [formOpen, setFormOpen] = useState(false);
+  const [quickAddOpen, setQuickAddOpen] = useState(false);
   const [editing, setEditing] = useState<ExpenseEntry | undefined>(undefined);
   const [ownerFilter, setOwnerFilter] = useState<OwnerFilter>('all');
   const [categoryFilter, setCategoryFilter] = useState<string>('all');
@@ -78,16 +80,21 @@ export function ExpenseSectionPage({
           <h1>{heading}</h1>
           <p className="page__description">{description}</p>
         </div>
-        <button
-          type="button"
-          className="btn btn--primary"
-          onClick={() => {
-            setEditing(undefined);
-            setFormOpen(true);
-          }}
-        >
-          {addLabel}
-        </button>
+        <div className="page__header-actions">
+          <button type="button" className="btn btn--secondary" onClick={() => setQuickAddOpen(true)}>
+            Add from template
+          </button>
+          <button
+            type="button"
+            className="btn btn--primary"
+            onClick={() => {
+              setEditing(undefined);
+              setFormOpen(true);
+            }}
+          >
+            {addLabel}
+          </button>
+        </div>
       </header>
 
       <div className="card summary-strip">
@@ -166,6 +173,29 @@ export function ExpenseSectionPage({
           title={editing ? `Edit ${editing.name}` : addLabel}
           onSave={handleSave}
           onClose={() => setFormOpen(false)}
+        />
+      )}
+
+      {quickAddOpen && (
+        <QuickAddExpenseModal
+          section={section}
+          onAdd={async (template) => {
+            await expenseRepository.create({
+              monthId: selectedMonth.id,
+              section,
+              name: template.name,
+              categoryId: template.categoryId,
+              amountCents: template.defaultAmountCents,
+              owner: template.owner,
+              split: template.split,
+              recurring: template.recurring,
+              dueDay: template.dueDay,
+              notes: '',
+              templateId: template.id,
+            });
+            await refreshEntries();
+          }}
+          onClose={() => setQuickAddOpen(false)}
         />
       )}
     </section>

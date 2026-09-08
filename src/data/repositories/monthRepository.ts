@@ -1,22 +1,25 @@
 import { v4 as uuid } from 'uuid';
 import { getDb } from '../database/db';
-import { MonthKey, MonthlyPlan } from '../../domain/monthly-plan/types';
+import { MonthKey, MonthlyPlan, normalizeMonthlyPlan } from '../../domain/monthly-plan/types';
+import { defaultReviewState } from '../../domain/monthly-plan/review';
 
 export const monthRepository = {
   async getAll(): Promise<MonthlyPlan[]> {
     const db = await getDb();
     const all = await db.getAll('months');
-    return all.sort((a, b) => a.monthKey.localeCompare(b.monthKey));
+    return all.map(normalizeMonthlyPlan).sort((a, b) => a.monthKey.localeCompare(b.monthKey));
   },
 
   async getByKey(monthKey: MonthKey): Promise<MonthlyPlan | undefined> {
     const db = await getDb();
-    return db.getFromIndex('months', 'by-monthKey', monthKey);
+    const found = await db.getFromIndex('months', 'by-monthKey', monthKey);
+    return found ? normalizeMonthlyPlan(found) : undefined;
   },
 
   async getById(id: string): Promise<MonthlyPlan | undefined> {
     const db = await getDb();
-    return db.get('months', id);
+    const found = await db.get('months', id);
+    return found ? normalizeMonthlyPlan(found) : undefined;
   },
 
   async create(monthKey: MonthKey, copiedFromMonthKey: string | null = null): Promise<MonthlyPlan> {
@@ -32,6 +35,7 @@ export const monthRepository = {
       createdAt: now,
       updatedAt: now,
       copiedFromMonthKey,
+      review: defaultReviewState(),
     };
     const db = await getDb();
     await db.put('months', plan);

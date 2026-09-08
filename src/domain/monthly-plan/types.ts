@@ -1,3 +1,5 @@
+import { MonthReviewState, defaultReviewState, normalizeReviewState } from './review';
+
 /** Month keys are "YYYY-MM" strings, e.g. "2026-09". */
 export type MonthKey = string;
 
@@ -9,6 +11,21 @@ export interface MonthlyPlan {
   updatedAt: string;
   /** monthKey this plan was copied from, if any. */
   copiedFromMonthKey: string | null;
+  /** Monthly Review workflow state; absent on pre-upgrade records. */
+  review: MonthReviewState;
+}
+
+/** Fills in defaults for a plan read from storage that predates the Monthly Review feature. */
+export function normalizeMonthlyPlan(raw: Partial<MonthlyPlan> & { id: string; monthKey: MonthKey }): MonthlyPlan {
+  return {
+    id: raw.id,
+    monthKey: raw.monthKey,
+    notes: raw.notes ?? '',
+    createdAt: raw.createdAt ?? new Date().toISOString(),
+    updatedAt: raw.updatedAt ?? new Date().toISOString(),
+    copiedFromMonthKey: raw.copiedFromMonthKey ?? null,
+    review: raw.review ? normalizeReviewState(raw.review) : defaultReviewState(),
+  };
 }
 
 export function monthKeyLabel(monthKey: MonthKey): string {
